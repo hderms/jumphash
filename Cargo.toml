@@ -1,8 +1,17 @@
 [package]
-name = "jumphash"
+name = "jumpconsistenthash"
 version = "0.1.0"
+authors = ["Dermot H. <dermot.thomas.haughey@gmail.com>"]
+description = "Implementation of Jump consistent hash i.e. 'A Fast, Minimal Memory, Consistent Hash Algorithm' from Google"
+keywords = ["hash", "jumphash", "distributed-systems"]
+readme = "README.md"
+license = "ISC"
+homepage = "https://github.com/hderms/jumphash"
+repository = "https://github.com/hderms/jumphash"
+categories = ["algorithms"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[lib]
+name = "jumpconsistenthash"
+path = "src/lib.rs"

@@ -1,28 +1,37 @@
+//!  implements Google's Jump Consistent Hash
+//! From the paper "A Fast, Minimal Memory, Consistent Hash Algorithm" by John Lamping, Eric Veach (2014).
+//! [Paper](http://arxiv.org/abs/1406.2294)
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
-// Package jump implements Google's Jump Consistent Hash
-/*
-From the paper "A Fast, Minimal Memory, Consistent Hash Algorithm" by John Lamping, Eric Veach (2014).
-http://arxiv.org/abs/1406.2294
-*/
-/// hashes an &str to a u32 which is in the range of 0..buckets
+
+/// hashes an `&str` to a `u32` which is in the range of 0..buckets
+///
 /// expects a number of buckets greater than zero
-fn jump_hash_from_str(key: &str, buckets: u32) -> u32 {
+/// ```rust
+/// use jumpconsistenthash::jump_hash_from_str;
+/// //the bucket hashed should always be less than the number of buckets
+/// let number_of_buckets = 10;
+/// let next_bucket = jump_hash_from_str("some_key", number_of_buckets);
+/// assert!(next_bucket < number_of_buckets);
+/// ```
+pub fn jump_hash_from_str(key: &str, buckets: u32) -> u32 {
     assert!(buckets >= 1);
     let mut hasher = DefaultHasher::new();
     key.hash(&mut hasher);
     let key = hasher.finish();
     jump_hash_from_u64(key, buckets)
 }
-
-// A constant from a 64 bit linear congruential generator found in the original paper
-// but explained here:
-// https://nuclear.llnl.gov/CNP/rng/rngman/node4.html
-// Jump hash has a 64 bit pseudo-random generator 'embedded' in it
-const SIXTY_FOUR_BIT_LINEAR_CONGRUENTIAL_GENERATOR_A_CONSTANT: i64 = 2862933555777941757;
-/// hashes a u64 to a u32 which is in the range of 0..buckets
+/// hashes a `u64` to a `u32` which is in the range of 0..buckets
+///
 /// expects a number of buckets greater than zero
-fn jump_hash_from_u64(key: u64, buckets: u32) -> u32 {
+/// ```rust
+/// use jumpconsistenthash::jump_hash_from_u64;
+/// //the bucket hashed should always be less than the number of buckets
+/// let number_of_buckets = 10;
+/// let bucket = jump_hash_from_u64(52, number_of_buckets);
+/// assert!(bucket < number_of_buckets);
+/// ```
+pub fn jump_hash_from_u64(key: u64, buckets: u32) -> u32 {
     assert!(buckets >= 1);
     let mut b: i64 = -1;
     let mut j: i64 = 0;
@@ -30,11 +39,18 @@ fn jump_hash_from_u64(key: u64, buckets: u32) -> u32 {
 
     while j < buckets as i64 {
         b = j;
-        key = key.wrapping_mul( 2862933555777941757).wrapping_add(1);
-        j = (((b.wrapping_add(1) as f64) * ((1i64 << 31) as f64)) / ((key >> 33).wrapping_add(1) as f64)) as i64;
+        key = key.wrapping_mul(LCG_CONSTANT).wrapping_add(1);
+        j = (b.wrapping_add(1) * (1i64 << 31)) / ((key >> 33).wrapping_add(1) as i64);
     }
     b as u32
 }
+
+
+/// A constant from a 64 bit linear congruential generator found in the original paper
+/// but explained here:
+/// https://nuclear.llnl.gov/CNP/rng/rngman/node4.html
+/// Jump hash has a 64 bit pseudo-random generator 'embedded' in it
+const LCG_CONSTANT: u64 = 2862933555777941757;
 
 #[cfg(test)]
 mod test {
@@ -85,8 +101,8 @@ mod test {
     }
 
     struct TestCase{
-         key: u64,
-         bucket: Vec<u32>
+        key: u64,
+        bucket: Vec<u32>
     }
     #[test]
     fn matches_reference_code() {
