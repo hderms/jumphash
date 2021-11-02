@@ -1,9 +1,8 @@
 name: Rust
 
 on:
-  pull_request:
+  push:
     branches: [ main ]
-
 env:
   CARGO_TERM_COLOR: always
 
@@ -22,3 +21,6 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - uses: katyo/publish-crates@v1
+      with:
+        registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
