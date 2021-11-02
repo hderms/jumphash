@@ -1,8 +1,8 @@
 //!  implements Google's Jump Consistent Hash
 //! From the paper "A Fast, Minimal Memory, Consistent Hash Algorithm" by John Lamping, Eric Veach (2014).
 //! [Paper](http://arxiv.org/abs/1406.2294)
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 /// hashes an `&str` to a `u32` which is in the range of 0..buckets
 ///
@@ -45,7 +45,6 @@ pub fn jump_hash_from_u64(key: u64, buckets: u32) -> u32 {
     b as u32
 }
 
-
 /// A constant from a 64 bit linear congruential generator found in the original paper
 /// but explained here:
 /// https://nuclear.llnl.gov/CNP/rng/rngman/node4.html
@@ -86,39 +85,50 @@ mod test {
                 let next_shard = jump_hash_from_str(&i.to_string(), num_buckets + 1);
 
                 if current_shard != next_shard {
-                    if next_shard != num_buckets  {
+                    if next_shard != num_buckets {
                         panic!("if keys move, we'd expect them to move to new shard, not an existing shard")
                     }
                     key_moved += 1;
                 }
             }
             //Either we expect the amount of keys moved to the new shard to be consistent with the amount of keys we'd expect to be divided up equally into each shard (with considerable wiggle-room of 15%)
-            let keys_moved_as_acceptable_proportion = (key_moved as f64) < ((num_keys as f64) / (num_buckets as f64 ) * 1.15 );
+            let keys_moved_as_acceptable_proportion =
+                (key_moved as f64) < ((num_keys as f64) / (num_buckets as f64) * 1.15);
             //or we expect the relative number of keys as compared to the total number of keys to be small
-            let keys_moved_as_acceptable_percent_of_total = (key_moved as f64 / num_keys as f64) < 0.02;
-            assert!(keys_moved_as_acceptable_proportion || keys_moved_as_acceptable_percent_of_total)
+            let keys_moved_as_acceptable_percent_of_total =
+                (key_moved as f64 / num_keys as f64) < 0.02;
+            assert!(
+                keys_moved_as_acceptable_proportion || keys_moved_as_acceptable_percent_of_total
+            )
         }
     }
 
-    struct TestCase{
+    struct TestCase {
         key: u64,
-        bucket: Vec<u32>
+        bucket: Vec<u32>,
     }
     #[test]
     fn matches_reference_code() {
         // test case borrowed from https://github.com/dgryski/go-jump/blob/master/jump_test.go
-        let cases = vec!(
-            TestCase{key: 1, bucket: vec!(0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 17, 17)},
-            TestCase{key: 0xdeadbeef, bucket: vec!(0, 1, 2, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16, 16, 16)},
-            TestCase{key: 0x0ddc0ffeebadf00d, bucket: vec!(0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 15, 15, 15, 15)},
-        );
+        let cases = vec![
+            TestCase {
+                key: 1,
+                bucket: vec![0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 17, 17],
+            },
+            TestCase {
+                key: 0xdeadbeef,
+                bucket: vec![0, 1, 2, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 16, 16, 16],
+            },
+            TestCase {
+                key: 0x0ddc0ffeebadf00d,
+                bucket: vec![0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 15, 15, 15, 15],
+            },
+        ];
         for case in cases {
-            for (i, expected_value)  in case.bucket.iter().enumerate() {
+            for (i, expected_value) in case.bucket.iter().enumerate() {
                 let result = jump_hash_from_u64(case.key, (i + 1) as u32);
                 assert_eq!(&result, expected_value, "test case didn't match")
-
             }
-
         }
     }
 }
