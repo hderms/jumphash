@@ -1,5 +1,5 @@
 # Jumphash
-![version](https://img.shields.io/crates/v/jumpconsistenthash) ![docs](https://img.shields.io/docsrs/jumpconsistenthash) ![license](https://img.shields.io/crates/l/jumpconsistenthash)
+[![version](https://img.shields.io/crates/v/jumpconsistenthash)](https://crates.io/crates/jumpconsistenthash) [![docs](https://img.shields.io/docsrs/jumpconsistenthash)](https://docs.rs/jumpconsistenthash) ![license](https://img.shields.io/crates/l/jumpconsistenthash)
 
 implements Google's Jump Consistent Hash
 From the paper "A Fast, Minimal Memory, Consistent Hash Algorithm" by John Lamping, Eric Veach (2014).
