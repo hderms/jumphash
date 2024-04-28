@@ -31,16 +31,15 @@ pub fn jump_hash_from_str(key: &str, buckets: u32) -> u32 {
 /// let bucket = jump_hash_from_u64(52, number_of_buckets);
 /// assert!(bucket < number_of_buckets);
 /// ```
-pub fn jump_hash_from_u64(key: u64, buckets: u32) -> u32 {
+pub fn jump_hash_from_u64(mut key: u64, buckets: u32) -> u32 {
     assert!(buckets >= 1);
     let mut b: i64 = -1;
     let mut j: i64 = 0;
-    let mut key = key;
 
     while j < buckets as i64 {
         b = j;
         key = key.wrapping_mul(LCG_CONSTANT).wrapping_add(1);
-        j = (b.wrapping_add(1) * (1i64 << 31)) / ((key >> 33).wrapping_add(1) as i64);
+        j = ((b + 1) * (1i64 << 31)) / (((key >> 33) + 1) as i64);
     }
     b as u32
 }
